@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>VoiSuperBowlWhaleMarket - Contract Documentation</title>
+	<style>
+		:root {
+			--color-bg: #0f172a;
+			--color-surface: #1e293b;
+			--color-surface-secondary: #151d2e;
+			--color-border: #334155;
+			--color-text: #e2e8f0;
+			--color-text-muted: #94a3b8;
+			--color-cyan: #22d3ee;
+			--color-cyan-bg: rgba(34, 211, 238, 0.15);
+			--color-violet: #a78bfa;
+			--color-violet-bg: rgba(167, 139, 250, 0.15);
+			--color-amber: #fbbf24;
+			--color-amber-bg: rgba(251, 191, 36, 0.15);
+			--color-green: #4ade80;
+			--color-green-bg: rgba(74, 222, 128, 0.15);
+			--color-blue: #60a5fa;
+			--color-blue-bg: rgba(96, 165, 250, 0.15);
+			--color-orange: #fb923c;
+			--color-orange-bg: rgba(251, 146, 60, 0.15);
+			--color-purple: #c084fc;
+			--color-purple-bg: rgba(192, 132, 252, 0.15);
+			--color-neutral-bg: rgba(148, 163, 184, 0.15);
+			--color-code-bg: #0f172a;
+			--font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Monaco, Consolas, monospace;
+		}
+
+		@media (prefers-color-scheme: light) {
+			:root {
+				--color-bg: #f8fafc;
+				--color-surface: #ffffff;
+				--color-surface-secondary: #f1f5f9;
+				--color-border: #e2e8f0;
+				--color-text: #1e293b;
+				--color-text-muted: #64748b;
+				--color-code-bg: #f1f5f9;
+				--color-cyan: #0891b2;
+				--color-violet: #7c3aed;
+				--color-amber: #d97706;
+				--color-green: #16a34a;
+				--color-blue: #2563eb;
+				--color-orange: #ea580c;
+				--color-purple: #9333ea;
+			}
+		}
+
+		* { box-sizing: border-box; margin: 0; padding: 0; }
+
+		body {
+			font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+			background: var(--color-bg);
+			color: var(--color-text);
+			line-height: 1.6;
+			padding: 2rem;
+			max-width: 1000px;
+			margin: 0 auto;
+		}
+
+		.header {
+			margin-bottom: 1rem;
+		}
+
+		h1 {
+			font-size: 1.75rem;
+			font-weight: 700;
+			margin-bottom: 0.5rem;
+			color: var(--color-text);
+		}
+
+		.description {
+			color: var(--color-text-muted);
+			font-size: 0.95rem;
+		}
+
+		.badges {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 0.5rem;
+			margin-bottom: 1.5rem;
+		}
+
+		.badge {
+			font-size: 0.75rem;
+			padding: 0.25rem 0.625rem;
+			border-radius: 9999px;
+			font-weight: 500;
+			display: inline-flex;
+			align-items: center;
+		}
+
+		.badge-cyan { background: var(--color-cyan-bg); color: var(--color-cyan); }
+		.badge-violet { background: var(--color-violet-bg); color: var(--color-violet); }
+		.badge-amber { background: var(--color-amber-bg); color: var(--color-amber); }
+		.badge-green { background: var(--color-green-bg); color: var(--color-green); }
+		.badge-blue { background: var(--color-blue-bg); color: var(--color-blue); }
+		.badge-orange { background: var(--color-orange-bg); color: var(--color-orange); }
+		.badge-purple { background: var(--color-purple-bg); color: var(--color-purple); }
+		.badge-neutral { background: var(--color-neutral-bg); color: var(--color-text-muted); }
+
+		.card {
+			background: var(--color-surface);
+			border: 1px solid var(--color-border);
+			border-radius: 0.75rem;
+			margin-bottom: 1.5rem;
+			overflow: hidden;
+		}
+
+		.card-header {
+			padding: 0.875rem 1.25rem;
+			background: var(--color-surface-secondary);
+			border-bottom: 1px solid var(--color-border);
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+		}
+
+		.card-header h2 {
+			font-size: 0.875rem;
+			font-weight: 600;
+			color: var(--color-text);
+			margin: 0;
+		}
+
+		.header-count {
+			font-size: 0.75rem;
+			color: var(--color-text-muted);
+		}
+
+		.card-body {
+			padding: 1.25rem;
+		}
+
+		h3 {
+			font-size: 0.875rem;
+			font-weight: 600;
+			margin-bottom: 0.5rem;
+		}
+
+		h4 {
+			font-size: 0.75rem;
+			font-weight: 600;
+			margin-bottom: 0.5rem;
+			color: var(--color-text-muted);
+			text-transform: uppercase;
+			letter-spacing: 0.025em;
+		}
+
+		.info-grid, .schema-grid {
+			display: grid;
+			grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+			gap: 1rem;
+		}
+
+		.info-item, .schema-item {
+			padding: 0.75rem;
+			background: var(--color-code-bg);
+			border-radius: 0.5rem;
+		}
+
+		.info-item .label {
+			display: block;
+			font-size: 0.6875rem;
+			color: var(--color-text-muted);
+			text-transform: uppercase;
+			letter-spacing: 0.05em;
+			margin-bottom: 0.25rem;
+		}
+
+		.info-item .value {
+			font-weight: 600;
+			color: var(--color-cyan);
+		}
+
+		.schema-values {
+			display: flex;
+			gap: 1rem;
+			font-size: 0.875rem;
+		}
+
+		/* State/Key Lists */
+		.state-list {
+			display: flex;
+			flex-direction: column;
+		}
+
+		.state-item {
+			padding: 0.875rem 0;
+			border-bottom: 1px solid var(--color-border);
+		}
+
+		.state-item:last-child {
+			border-bottom: none;
+			padding-bottom: 0;
+		}
+
+		.state-item:first-child {
+			padding-top: 0;
+		}
+
+		.state-item-main {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			flex-wrap: wrap;
+			gap: 0.5rem;
+		}
+
+		.state-name {
+			font-family: var(--font-mono);
+			font-size: 0.875rem;
+			color: var(--color-text);
+			background: transparent;
+			padding: 0;
+		}
+
+		.state-desc, .state-meta {
+			font-size: 0.75rem;
+			color: var(--color-text-muted);
+			margin-top: 0.375rem;
+		}
+
+		.state-meta code {
+			background: var(--color-code-bg);
+			padding: 0.125rem 0.375rem;
+			border-radius: 0.25rem;
+			font-size: 0.75rem;
+		}
+
+		.type-badge {
+			font-family: var(--font-mono);
+			font-size: 0.75rem;
+			padding: 0.125rem 0.5rem;
+			border-radius: 0.25rem;
+		}
+
+		.type-flow {
+			display: flex;
+			align-items: center;
+			gap: 0.375rem;
+		}
+
+		.arrow {
+			color: var(--color-text-muted);
+			font-size: 0.75rem;
+		}
+
+		.slot-label {
+			font-size: 0.75rem;
+			color: var(--color-text-muted);
+			margin-right: 0.25rem;
+		}
+
+		/* Structs */
+		.struct {
+			margin-bottom: 1.5rem;
+		}
+
+		.struct:last-child {
+			margin-bottom: 0;
+		}
+
+		.struct-name {
+			font-family: var(--font-mono);
+			font-size: 0.875rem;
+			color: var(--color-text);
+			margin-bottom: 0.75rem;
+		}
+
+		.struct-fields {
+			background: var(--color-code-bg);
+			border-radius: 0.5rem;
+			overflow: hidden;
+		}
+
+		.struct-field {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			padding: 0.625rem 0.875rem;
+			border-bottom: 1px solid var(--color-border);
+		}
+
+		.struct-field:last-child {
+			border-bottom: none;
+		}
+
+		.field-name {
+			font-family: var(--font-mono);
+			font-size: 0.8125rem;
+			color: var(--color-text);
+			background: transparent;
+			padding: 0;
+		}
+
+		/* Methods */
+		.methods-list {
+			display: flex;
+			flex-direction: column;
+			gap: 1rem;
+		}
+
+		.method {
+			padding: 1rem;
+			background: var(--color-code-bg);
+			border-radius: 0.5rem;
+			border-left: 3px solid var(--color-cyan);
+		}
+
+		.method-header {
+			display: flex;
+			align-items: flex-start;
+			justify-content: space-between;
+			flex-wrap: wrap;
+			gap: 0.5rem;
+			margin-bottom: 0.5rem;
+		}
+
+		.method-title {
+			display: flex;
+			align-items: center;
+			gap: 0.5rem;
+		}
+
+		.method-name {
+			font-family: var(--font-mono);
+			font-size: 0.9375rem;
+			color: var(--color-cyan);
+			background: transparent;
+			padding: 0;
+		}
+
+		.method-args-count {
+			font-size: 0.75rem;
+			color: var(--color-text-muted);
+		}
+
+		.method-meta {
+			display: flex;
+			align-items: center;
+			gap: 0.5rem;
+		}
+
+		.method-returns {
+			font-size: 0.75rem;
+			color: var(--color-text-muted);
+		}
+
+		.method-returns code {
+			color: var(--color-cyan);
+			opacity: 0.8;
+			background: transparent;
+			padding: 0;
+		}
+
+		.method-desc {
+			font-size: 0.875rem;
+			color: var(--color-text-muted);
+			margin-bottom: 0.75rem;
+		}
+
+		.method-signature {
+			display: flex;
+			align-items: center;
+			gap: 0.5rem;
+			margin-bottom: 1rem;
+			flex-wrap: wrap;
+		}
+
+		.signature-label {
+			font-size: 0.75rem;
+			color: var(--color-text-muted);
+		}
+
+		.signature-value {
+			font-family: var(--font-mono);
+			font-size: 0.75rem;
+			background: var(--color-surface);
+			padding: 0.375rem 0.625rem;
+			border-radius: 0.25rem;
+			color: var(--color-text-muted);
+		}
+
+		.method-args, .method-return-info {
+			margin-bottom: 0.75rem;
+		}
+
+		.method-return-info:last-child {
+			margin-bottom: 0;
+		}
+
+		.args-list {
+			display: flex;
+			flex-direction: column;
+			gap: 0.5rem;
+			padding-left: 0.75rem;
+			border-left: 2px solid var(--color-border);
+		}
+
+		.arg-item, .return-item {
+			display: flex;
+			align-items: center;
+			gap: 0.75rem;
+			flex-wrap: wrap;
+		}
+
+		.arg-name {
+			font-family: var(--font-mono);
+			font-size: 0.8125rem;
+			color: var(--color-text);
+			background: transparent;
+			padding: 0;
+		}
+
+		.arg-desc, .return-desc {
+			font-size: 0.75rem;
+			color: var(--color-text-muted);
+		}
+
+		/* Events */
+		.events-list {
+			display: flex;
+			flex-direction: column;
+			gap: 1rem;
+		}
+
+		.event {
+			background: var(--color-code-bg);
+			border-radius: 0.5rem;
+			overflow: hidden;
+		}
+
+		.event-header {
+			display: flex;
+			align-items: center;
+			gap: 0.5rem;
+			padding: 0.75rem 1rem;
+			background: var(--color-surface-secondary);
+			border-bottom: 1px solid var(--color-border);
+		}
+
+		.event-icon {
+			width: 1rem;
+			height: 1rem;
+			color: var(--color-amber);
+		}
+
+		.event-name {
+			font-family: var(--font-mono);
+			font-size: 0.875rem;
+			color: var(--color-text);
+			background: transparent;
+			padding: 0;
+		}
+
+		.event-args {
+			padding: 0.5rem 0;
+		}
+
+		.event-arg {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			padding: 0.5rem 1rem;
+		}
+
+		/* Bare Actions */
+		.bare-actions {
+			display: grid;
+			grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+			gap: 1.5rem;
+		}
+
+		.action-group h4 {
+			margin-bottom: 0.5rem;
+		}
+
+		.action-badges {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 0.375rem;
+		}
+
+		code {
+			font-family: var(--font-mono);
+			font-size: 0.875em;
+			background: var(--color-code-bg);
+			padding: 0.125rem 0.375rem;
+			border-radius: 0.25rem;
+			color: var(--color-cyan);
+		}
+
+		footer {
+			margin-top: 3rem;
+			padding-top: 1.5rem;
+			border-top: 1px solid var(--color-border);
+			text-align: center;
+			color: var(--color-text-muted);
+			font-size: 0.875rem;
+		}
+
+		footer a {
+			color: var(--color-cyan);
+			text-decoration: none;
+		}
+
+		footer a:hover {
+			text-decoration: underline;
+		}
+
+		.error {
+			color: #ef4444;
+			padding: 1rem;
+			text-align: center;
+		}
+	</style>
+</head>
+<body>
+	<header class="header">
+			<h1>VoiSuperBowlWhaleMarket</h1>
+			
+		</header><div class="badges"><span class="badge badge-cyan">6 Methods</span><span class="badge badge-neutral">8 Global</span><span class="badge badge-violet">2 Box</span><span class="badge badge-neutral">ARC-22, ARC-28</span></div><section class="card">
+			<div class="card-header"><h2>Contract Information</h2></div>
+			<div class="card-body"><div class="info-grid"><div class="info-item">
+				<span class="label">Compiler</span>
+				<span class="value">puya</span>
+			</div><div class="info-item">
+				<span class="label">Approval Program</span>
+				<span class="value">20,032 bytes</span>
+			</div><div class="info-item">
+				<span class="label">Clear Program</span>
+				<span class="value">184 bytes</span>
+			</div></div></div></section><section class="card">
+				<div class="card-header"><h2>State Schema</h2></div>
+				<div class="card-body"><div class="schema-grid"><div class="schema-item">
+					<h3>Global State</h3>
+					<div class="schema-values">
+						<span><strong>Bytes:</strong> 0</span>
+						<span><strong>Uints:</strong> 8</span>
+					</div>
+				</div><div class="schema-item">
+					<h3>Local State</h3>
+					<div class="schema-values">
+						<span><strong>Bytes:</strong> 0</span>
+						<span><strong>Uints:</strong> 0</span>
+					</div>
+				</div></div></div></section><section class="card">
+				<div class="card-header"><h2>Global State Keys</h2></div>
+				<div class="card-body"><div class="state-list"><div class="state-item">
+					<div class="state-item-main">
+						<code class="state-name">total_sea_sold</code>
+						<span class="type-badge badge-cyan">AVMUint64</span>
+					</div>
+					
+				</div><div class="state-item">
+					<div class="state-item-main">
+						<code class="state-name">total_pat_sold</code>
+						<span class="type-badge badge-cyan">AVMUint64</span>
+					</div>
+					
+				</div><div class="state-item">
+					<div class="state-item-main">
+						<code class="state-name">is_resolved</code>
+						<span class="type-badge badge-cyan">AVMUint64</span>
+					</div>
+					
+				</div><div class="state-item">
+					<div class="state-item-main">
+						<code class="state-name">market_paused</code>
+						<span class="type-badge badge-cyan">AVMUint64</span>
+					</div>
+					
+				</div><div class="state-item">
+					<div class="state-item-main">
+						<code class="state-name">winner</code>
+						<span class="type-badge badge-cyan">AVMUint64</span>
+					</div>
+					
+				</div><div class="state-item">
+					<div class="state-item-main">
+						<code class="state-name">base_price</code>
+						<span class="type-badge badge-cyan">AVMUint64</span>
+					</div>
+					
+				</div><div class="state-item">
+					<div class="state-item-main">
+						<code class="state-name">skew_sensitivity</code>
+						<span class="type-badge badge-cyan">AVMUint64</span>
+					</div>
+					
+				</div><div class="state-item">
+					<div class="state-item-main">
+						<code class="state-name">max_bet_voi</code>
+						<span class="type-badge badge-cyan">AVMUint64</span>
+					</div>
+					
+				</div></div></div></section><section class="card">
+				<div class="card-header"><h2>Box Maps</h2></div>
+				<div class="card-body"><div class="state-list"><div class="state-item">
+					<div class="state-item-main">
+						<code class="state-name">balances_sea</code>
+						<div class="type-flow">
+							<span class="type-badge badge-violet">address</span>
+							<span class="arrow">→</span>
+							<span class="type-badge badge-cyan">uint64</span>
+						</div>
+					</div>
+					<p class="state-meta">prefix: <code>balances_sea</code></p>
+					
+				</div><div class="state-item">
+					<div class="state-item-main">
+						<code class="state-name">balances_pat</code>
+						<div class="type-flow">
+							<span class="type-badge badge-violet">address</span>
+							<span class="arrow">→</span>
+							<span class="type-badge badge-cyan">uint64</span>
+						</div>
+					</div>
+					<p class="state-meta">prefix: <code>balances_pat</code></p>
+					
+				</div></div></div></section><section class="card">
+				<div class="card-header">
+					<h2>Methods</h2>
+					<span class="header-count">6 available</span>
+				</div>
+				<div class="card-body"><div class="methods-list"><div class="method">
+					<div class="method-header">
+						<div class="method-title">
+							<code class="method-name">toggle_pause</code>
+							<span class="method-args-count">()</span>
+						</div>
+						<div class="method-meta">
+							
+							<span class="method-returns">returns <code>void</code></span>
+						</div>
+					</div>
+					<p class="method-desc">Admin emergency stop.</p>
+					<div class="method-signature">
+						<span class="signature-label">Signature:</span>
+						<code class="signature-value">toggle_pause()void</code>
+					</div><div class="method-return-info">
+					<h4>Returns</h4>
+					<div class="return-item">
+						<span class="type-badge badge-cyan">void</span>
+						
+					</div>
+				</div>
+				</div><div class="method">
+					<div class="method-header">
+						<div class="method-title">
+							<code class="method-name">get_price</code>
+							<span class="method-args-count">(1 args)</span>
+						</div>
+						<div class="method-meta">
+							<span class="badge badge-green">read-only</span>
+							<span class="method-returns">returns <code>uint64</code></span>
+						</div>
+					</div>
+					<p class="method-desc">Calculates current ticket price based on market skew.</p>
+					<div class="method-signature">
+						<span class="signature-label">Signature:</span>
+						<code class="signature-value">get_price(bool)uint64</code>
+					</div><div class="method-args">
+						<h4>Arguments</h4>
+						<div class="args-list"><div class="arg-item">
+							<code class="arg-name">want_sea</code>
+							<span class="type-badge badge-cyan">bool</span>
+							
+						</div></div></div><div class="method-return-info">
+					<h4>Returns</h4>
+					<div class="return-item">
+						<span class="type-badge badge-cyan">uint64</span>
+						
+					</div>
+				</div>
+				</div><div class="method">
+					<div class="method-header">
+						<div class="method-title">
+							<code class="method-name">buy_shares</code>
+							<span class="method-args-count">(2 args)</span>
+						</div>
+						<div class="method-meta">
+							
+							<span class="method-returns">returns <code>void</code></span>
+						</div>
+					</div>
+					<p class="method-desc">Allows users to buy tickets. Ensures house is always fully collateralized.</p>
+					<div class="method-signature">
+						<span class="signature-label">Signature:</span>
+						<code class="signature-value">buy_shares(pay,bool)void</code>
+					</div><div class="method-args">
+						<h4>Arguments</h4>
+						<div class="args-list"><div class="arg-item">
+							<code class="arg-name">payment</code>
+							<span class="type-badge badge-cyan">pay</span>
+							
+						</div><div class="arg-item">
+							<code class="arg-name">want_sea</code>
+							<span class="type-badge badge-cyan">bool</span>
+							
+						</div></div></div><div class="method-return-info">
+					<h4>Returns</h4>
+					<div class="return-item">
+						<span class="type-badge badge-cyan">void</span>
+						
+					</div>
+				</div>
+				</div><div class="method">
+					<div class="method-header">
+						<div class="method-title">
+							<code class="method-name">resolve_market</code>
+							<span class="method-args-count">(1 args)</span>
+						</div>
+						<div class="method-meta">
+							
+							<span class="method-returns">returns <code>void</code></span>
+						</div>
+					</div>
+					<p class="method-desc">Admin calls this to settle the game. 1=SEA, 2=PAT.</p>
+					<div class="method-signature">
+						<span class="signature-label">Signature:</span>
+						<code class="signature-value">resolve_market(uint64)void</code>
+					</div><div class="method-args">
+						<h4>Arguments</h4>
+						<div class="args-list"><div class="arg-item">
+							<code class="arg-name">winner_code</code>
+							<span class="type-badge badge-cyan">uint64</span>
+							
+						</div></div></div><div class="method-return-info">
+					<h4>Returns</h4>
+					<div class="return-item">
+						<span class="type-badge badge-cyan">void</span>
+						
+					</div>
+				</div>
+				</div><div class="method">
+					<div class="method-header">
+						<div class="method-title">
+							<code class="method-name">withdraw_house_profit</code>
+							<span class="method-args-count">()</span>
+						</div>
+						<div class="method-meta">
+							
+							<span class="method-returns">returns <code>void</code></span>
+						</div>
+					</div>
+					<p class="method-desc">Creator withdraws the &#039;Spread&#039; and any remaining seed principal.
+Ensures winners can always be paid 1.00 VOI per share first.</p>
+					<div class="method-signature">
+						<span class="signature-label">Signature:</span>
+						<code class="signature-value">withdraw_house_profit()void</code>
+					</div><div class="method-return-info">
+					<h4>Returns</h4>
+					<div class="return-item">
+						<span class="type-badge badge-cyan">void</span>
+						
+					</div>
+				</div>
+				</div><div class="method">
+					<div class="method-header">
+						<div class="method-title">
+							<code class="method-name">claim_winnings</code>
+							<span class="method-args-count">()</span>
+						</div>
+						<div class="method-meta">
+							
+							<span class="method-returns">returns <code>void</code></span>
+						</div>
+					</div>
+					<p class="method-desc">Users call this after resolution to get their 1 VOI per share.</p>
+					<div class="method-signature">
+						<span class="signature-label">Signature:</span>
+						<code class="signature-value">claim_winnings()void</code>
+					</div><div class="method-return-info">
+					<h4>Returns</h4>
+					<div class="return-item">
+						<span class="type-badge badge-cyan">void</span>
+						
+					</div>
+				</div>
+				</div></div></div></section><section class="card">
+				<div class="card-header"><h2>Bare Actions</h2></div>
+				<div class="card-body"><div class="bare-actions"><div class="action-group">
+					<h4>On Create</h4>
+					<div class="action-badges">
+						<span class="badge badge-green">NoOp</span>
+					</div>
+				</div></div></div></section><footer>
+			<p>Generated by <a href="https://avmstudio.com" target="_blank">AVM Studio</a></p>
+		</footer>
+</body>
+</html>

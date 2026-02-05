@@ -1,0 +1,596 @@
+#pragma version 10
+#pragma typetrack false
+
+// algopy.arc4.ARC4Contract.approval_program() -> uint64:
+main:
+    intcblock 0 1 10000 1000000
+    bytecblock "total_sea_sold" "total_pat_sold" "is_resolved" "base_price" "market_paused" "winner" "balances_sea" "balances_pat" "skew_sensitivity" "max_bet_voi"
+    txn ApplicationID
+    bnz main_after_if_else@2
+    // contract.py:9-10
+    // # Market State
+    // self.total_sea_sold = UInt64(0)
+    bytec_0 // "total_sea_sold"
+    intc_0 // 0
+    app_global_put
+    // contract.py:11
+    // self.total_pat_sold = UInt64(0)
+    bytec_1 // "total_pat_sold"
+    intc_0 // 0
+    app_global_put
+    // contract.py:12
+    // self.is_resolved = False
+    bytec_2 // "is_resolved"
+    intc_0 // 0
+    app_global_put
+    // contract.py:13
+    // self.market_paused = False
+    bytec 4 // "market_paused"
+    intc_0 // 0
+    app_global_put
+    // contract.py:14
+    // self.winner = UInt64(0) # 1 = Seahawks, 2 = Patriots
+    bytec 5 // "winner"
+    intc_0 // 0
+    app_global_put
+    // contract.py:16-17
+    // # Configuration (MicroVoi: 1,000,000 = 1 VOI)
+    // self.base_price = UInt64(510_000)      # 0.51 VOI (Creates 2% House Spread)
+    bytec_3 // "base_price"
+    pushint 510000
+    app_global_put
+    // contract.py:18
+    // self.skew_sensitivity = UInt64(10_000)  # Price +0.01 for every 10k share lead
+    bytec 8 // "skew_sensitivity"
+    intc_2 // 10000
+    app_global_put
+    // contract.py:19
+    // self.max_bet_voi = UInt64(100_000_000_000) # Max 100,000 VOI per transaction
+    bytec 9 // "max_bet_voi"
+    pushint 100000000000
+    app_global_put
+
+main_after_if_else@2:
+    // contract.py:3
+    // class VoiSuperBowlWhaleMarket(ARC4Contract):
+    txn NumAppArgs
+    bz main___algopy_default_create@15
+    txn OnCompletion
+    !
+    assert
+    txn ApplicationID
+    assert
+    pushbytess 0x64b7f714 0x168ced56 0xd86a196b 0x9f679b36 0x90a74dd8 0x488eb501 // method "toggle_pause()void", method "get_price(bool)uint64", method "buy_shares(pay,bool)void", method "resolve_market(uint64)void", method "withdraw_house_profit()void", method "claim_winnings()void"
+    txna ApplicationArgs 0
+    match toggle_pause get_price buy_shares resolve_market withdraw_house_profit claim_winnings
+    err
+
+main___algopy_default_create@15:
+    txn OnCompletion
+    !
+    txn ApplicationID
+    !
+    &&
+    return
+
+
+// contract.VoiSuperBowlWhaleMarket.toggle_pause[routing]() -> void:
+toggle_pause:
+    // contract.py:24
+    // assert Txn.sender == Global.creator_address
+    txn Sender
+    global CreatorAddress
+    ==
+    assert
+    // contract.py:25
+    // self.market_paused = not self.market_paused
+    intc_0 // 0
+    bytec 4 // "market_paused"
+    app_global_get_ex
+    assert // check self.market_paused exists
+    !
+    bytec 4 // "market_paused"
+    swap
+    app_global_put
+    // contract.py:21
+    // @arc4.abimethod
+    intc_1 // 1
+    return
+
+
+// contract.VoiSuperBowlWhaleMarket.get_price[routing]() -> void:
+get_price:
+    // contract.py:27
+    // @arc4.abimethod(readonly=True)
+    txna ApplicationArgs 1
+    dup
+    len
+    intc_1 // 1
+    ==
+    assert // invalid number of bytes for arc4.bool
+    callsub contract.VoiSuperBowlWhaleMarket.get_price
+    itob
+    pushbytes 0x151f7c75
+    swap
+    concat
+    log
+    intc_1 // 1
+    return
+
+
+// contract.VoiSuperBowlWhaleMarket.buy_shares[routing]() -> void:
+buy_shares:
+    // contract.py:43
+    // @arc4.abimethod
+    txn GroupIndex
+    intc_1 // 1
+    -
+    dup
+    gtxns TypeEnum
+    intc_1 // pay
+    ==
+    assert // transaction type is pay
+    txna ApplicationArgs 1
+    dup
+    len
+    intc_1 // 1
+    ==
+    assert // invalid number of bytes for arc4.bool
+    // contract.py:46
+    // assert not self.is_resolved, "Market already ended"
+    intc_0 // 0
+    bytec_2 // "is_resolved"
+    app_global_get_ex
+    assert // check self.is_resolved exists
+    !
+    assert // Market already ended
+    // contract.py:47
+    // assert not self.market_paused, "Market is currently paused"
+    intc_0 // 0
+    bytec 4 // "market_paused"
+    app_global_get_ex
+    assert // check self.market_paused exists
+    !
+    assert // Market is currently paused
+    // contract.py:48
+    // assert payment.amount <= self.max_bet_voi, "Trade exceeds Max Bet limit"
+    dig 1
+    gtxns Amount
+    intc_0 // 0
+    bytec 9 // "max_bet_voi"
+    app_global_get_ex
+    assert // check self.max_bet_voi exists
+    dig 1
+    >=
+    assert // Trade exceeds Max Bet limit
+    // contract.py:49
+    // assert payment.receiver == Global.current_application_address, "Wrong receiver"
+    uncover 2
+    gtxns Receiver
+    global CurrentApplicationAddress
+    ==
+    assert // Wrong receiver
+    // contract.py:51
+    // is_sea = want_sea.native
+    dig 1
+    intc_0 // 0
+    getbit
+    // contract.py:52
+    // price = self.get_price(want_sea)
+    uncover 2
+    callsub contract.VoiSuperBowlWhaleMarket.get_price
+    // contract.py:54-55
+    // # Calculate shares (Payment / Price)
+    // shares = (payment.amount * 1_000_000) // price
+    uncover 2
+    intc_3 // 1000000
+    *
+    swap
+    /
+    dup
+    cover 2
+    // contract.py:56
+    // assert shares > 0, "Payment too small"
+    assert // Payment too small
+    // contract.py:58
+    // if is_sea:
+    bz buy_shares_else_body@3
+    // contract.py:59
+    // self.total_sea_sold += shares
+    intc_0 // 0
+    bytec_0 // "total_sea_sold"
+    app_global_get_ex
+    assert // check self.total_sea_sold exists
+    dig 1
+    +
+    bytec_0 // "total_sea_sold"
+    swap
+    app_global_put
+    // contract.py:60
+    // self.balances_sea[Txn.sender] = self.balances_sea.get(Txn.sender, default=UInt64(0)) + shares
+    bytec 6 // "balances_sea"
+    txn Sender
+    concat
+    box_get
+    swap
+    btoi
+    intc_0 // 0
+    swap
+    uncover 2
+    select
+    +
+    bytec 6 // "balances_sea"
+    txn Sender
+    concat
+    swap
+    itob
+    box_put
+
+buy_shares_after_if_else@4:
+    // contract.py:43
+    // @arc4.abimethod
+    intc_1 // 1
+    return
+
+buy_shares_else_body@3:
+    // contract.py:62
+    // self.total_pat_sold += shares
+    intc_0 // 0
+    bytec_1 // "total_pat_sold"
+    app_global_get_ex
+    assert // check self.total_pat_sold exists
+    dig 1
+    +
+    bytec_1 // "total_pat_sold"
+    swap
+    app_global_put
+    // contract.py:63
+    // self.balances_pat[Txn.sender] = self.balances_pat.get(Txn.sender, default=UInt64(0)) + shares
+    bytec 7 // "balances_pat"
+    txn Sender
+    concat
+    box_get
+    swap
+    btoi
+    intc_0 // 0
+    swap
+    uncover 2
+    select
+    +
+    bytec 7 // "balances_pat"
+    txn Sender
+    concat
+    swap
+    itob
+    box_put
+    b buy_shares_after_if_else@4
+
+
+// contract.VoiSuperBowlWhaleMarket.resolve_market[routing]() -> void:
+resolve_market:
+    // contract.py:65
+    // @arc4.abimethod
+    txna ApplicationArgs 1
+    dup
+    len
+    pushint 8
+    ==
+    assert // invalid number of bytes for arc4.uint64
+    btoi
+    // contract.py:68
+    // assert Txn.sender == Global.creator_address
+    txn Sender
+    global CreatorAddress
+    ==
+    assert
+    // contract.py:69
+    // assert not self.is_resolved
+    intc_0 // 0
+    bytec_2 // "is_resolved"
+    app_global_get_ex
+    assert // check self.is_resolved exists
+    !
+    assert
+    // contract.py:70
+    // self.is_resolved = True
+    bytec_2 // "is_resolved"
+    intc_1 // 1
+    app_global_put
+    // contract.py:71
+    // self.winner = winner_code
+    bytec 5 // "winner"
+    swap
+    app_global_put
+    // contract.py:65
+    // @arc4.abimethod
+    intc_1 // 1
+    return
+
+
+// contract.VoiSuperBowlWhaleMarket.withdraw_house_profit[routing]() -> void:
+withdraw_house_profit:
+    pushbytes ""
+    // contract.py:79
+    // assert Txn.sender == Global.creator_address
+    txn Sender
+    global CreatorAddress
+    ==
+    assert
+    // contract.py:80
+    // assert self.is_resolved
+    intc_0 // 0
+    bytec_2 // "is_resolved"
+    app_global_get_ex
+    assert // check self.is_resolved exists
+    assert
+    // contract.py:82-83
+    // # Payout liability = 1 VOI per winning share held by traders
+    // winning_shares = self.total_sea_sold if self.winner == 1 else self.total_pat_sold
+    intc_0 // 0
+    bytec 5 // "winner"
+    app_global_get_ex
+    assert // check self.winner exists
+    intc_1 // 1
+    ==
+    bz withdraw_house_profit_ternary_false@3
+    intc_0 // 0
+    bytec_0 // "total_sea_sold"
+    app_global_get_ex
+    assert // check self.total_sea_sold exists
+
+withdraw_house_profit_ternary_merge@4:
+    // contract.py:84
+    // reserve_required = winning_shares * 1_000_000
+    intc_3 // 1000000
+    *
+    // contract.py:86-87
+    // # Everything above the winning payout reserve belongs to you
+    // total_balance = Global.current_application_address.balance
+    global CurrentApplicationAddress
+    acct_params_get AcctBalance
+    assert // account funded
+    // contract.py:88
+    // assert total_balance >= reserve_required, "Math error: Insufficient reserves"
+    dup
+    dig 2
+    >=
+    assert // Math error: Insufficient reserves
+    // contract.py:90
+    // profit = total_balance - reserve_required
+    swap
+    -
+    dup
+    bury 2
+    // contract.py:91
+    // if profit > 0:
+    bz withdraw_house_profit_after_if_else@7
+    // contract.py:92
+    // itxn.Payment(receiver=Txn.sender, amount=profit, fee=0).submit()
+    itxn_begin
+    txn Sender
+    dig 1
+    itxn_field Amount
+    itxn_field Receiver
+    intc_1 // pay
+    itxn_field TypeEnum
+    intc_0 // 0
+    itxn_field Fee
+    itxn_submit
+
+withdraw_house_profit_after_if_else@7:
+    // contract.py:73
+    // @arc4.abimethod
+    intc_1 // 1
+    return
+
+withdraw_house_profit_ternary_false@3:
+    // contract.py:82-83
+    // # Payout liability = 1 VOI per winning share held by traders
+    // winning_shares = self.total_sea_sold if self.winner == 1 else self.total_pat_sold
+    intc_0 // 0
+    bytec_1 // "total_pat_sold"
+    app_global_get_ex
+    assert // check self.total_pat_sold exists
+    b withdraw_house_profit_ternary_merge@4
+
+
+// contract.VoiSuperBowlWhaleMarket.claim_winnings[routing]() -> void:
+claim_winnings:
+    // contract.py:97
+    // assert self.is_resolved
+    intc_0 // 0
+    bytec_2 // "is_resolved"
+    app_global_get_ex
+    assert // check self.is_resolved exists
+    assert
+    // contract.py:99
+    // if self.winner == 1:
+    intc_0 // 0
+    bytec 5 // "winner"
+    app_global_get_ex
+    assert // check self.winner exists
+    intc_1 // 1
+    ==
+    bz claim_winnings_else_body@3
+    // contract.py:100
+    // shares = self.balances_sea.get(Txn.sender, default=UInt64(0))
+    bytec 6 // "balances_sea"
+    txn Sender
+    concat
+    box_get
+    swap
+    btoi
+    intc_0 // 0
+    swap
+    uncover 2
+    select
+    // contract.py:101
+    // self.balances_sea[Txn.sender] = UInt64(0)
+    bytec 6 // "balances_sea"
+    txn Sender
+    concat
+    intc_0 // 0
+    itob
+    box_put
+
+claim_winnings_after_if_else@4:
+    // contract.py:106
+    // assert shares > 0, "No winning shares found"
+    dup
+    assert // No winning shares found
+    // contract.py:108-109
+    // # Pay out 1.00 VOI per winning share
+    // itxn.Payment(receiver=Txn.sender, amount=shares, fee=0).submit()
+    itxn_begin
+    txn Sender
+    itxn_field Receiver
+    itxn_field Amount
+    intc_1 // pay
+    itxn_field TypeEnum
+    intc_0 // 0
+    itxn_field Fee
+    itxn_submit
+    // contract.py:94
+    // @arc4.abimethod
+    intc_1 // 1
+    return
+
+claim_winnings_else_body@3:
+    // contract.py:103
+    // shares = self.balances_pat.get(Txn.sender, default=UInt64(0))
+    bytec 7 // "balances_pat"
+    txn Sender
+    concat
+    box_get
+    swap
+    btoi
+    intc_0 // 0
+    swap
+    uncover 2
+    select
+    // contract.py:104
+    // self.balances_pat[Txn.sender] = UInt64(0)
+    bytec 7 // "balances_pat"
+    txn Sender
+    concat
+    intc_0 // 0
+    itob
+    box_put
+    b claim_winnings_after_if_else@4
+
+
+// contract.VoiSuperBowlWhaleMarket.get_price(want_sea: bytes) -> uint64:
+contract.VoiSuperBowlWhaleMarket.get_price:
+    // contract.py:27-28
+    // @arc4.abimethod(readonly=True)
+    // def get_price(self, want_sea: arc4.Bool) -> UInt64:
+    proto 1 1
+    // contract.py:30
+    // is_sea = want_sea.native
+    frame_dig -1
+    intc_0 // 0
+    getbit
+    // contract.py:31
+    // if is_sea:
+    bz contract.VoiSuperBowlWhaleMarket.get_price_else_body@4
+    // contract.py:32
+    // if self.total_sea_sold > self.total_pat_sold:
+    intc_0 // 0
+    bytec_0 // "total_sea_sold"
+    app_global_get_ex
+    assert // check self.total_sea_sold exists
+    intc_0 // 0
+    bytec_1 // "total_pat_sold"
+    app_global_get_ex
+    assert // check self.total_pat_sold exists
+    >
+    bz contract.VoiSuperBowlWhaleMarket.get_price_after_if_else@3
+    // contract.py:33
+    // lead = self.total_sea_sold - self.total_pat_sold
+    intc_0 // 0
+    bytec_0 // "total_sea_sold"
+    app_global_get_ex
+    assert // check self.total_sea_sold exists
+    intc_0 // 0
+    bytec_1 // "total_pat_sold"
+    app_global_get_ex
+    assert // check self.total_pat_sold exists
+    -
+    // contract.py:34-35
+    // # Price increases as demand for SEA increases
+    // return self.base_price + (lead // self.skew_sensitivity * 10_000)
+    intc_0 // 0
+    bytec_3 // "base_price"
+    app_global_get_ex
+    assert // check self.base_price exists
+    intc_0 // 0
+    bytec 8 // "skew_sensitivity"
+    app_global_get_ex
+    assert // check self.skew_sensitivity exists
+    uncover 2
+    swap
+    /
+    intc_2 // 10000
+    *
+    +
+    retsub
+
+contract.VoiSuperBowlWhaleMarket.get_price_after_if_else@3:
+    // contract.py:36
+    // return self.base_price
+    intc_0 // 0
+    bytec_3 // "base_price"
+    app_global_get_ex
+    assert // check self.base_price exists
+    retsub
+
+contract.VoiSuperBowlWhaleMarket.get_price_else_body@4:
+    // contract.py:38
+    // if self.total_pat_sold > self.total_sea_sold:
+    intc_0 // 0
+    bytec_1 // "total_pat_sold"
+    app_global_get_ex
+    assert // check self.total_pat_sold exists
+    intc_0 // 0
+    bytec_0 // "total_sea_sold"
+    app_global_get_ex
+    assert // check self.total_sea_sold exists
+    >
+    bz contract.VoiSuperBowlWhaleMarket.get_price_after_if_else@6
+    // contract.py:39
+    // lead = self.total_pat_sold - self.total_sea_sold
+    intc_0 // 0
+    bytec_1 // "total_pat_sold"
+    app_global_get_ex
+    assert // check self.total_pat_sold exists
+    intc_0 // 0
+    bytec_0 // "total_sea_sold"
+    app_global_get_ex
+    assert // check self.total_sea_sold exists
+    -
+    // contract.py:40
+    // return self.base_price + (lead // self.skew_sensitivity * 10_000)
+    intc_0 // 0
+    bytec_3 // "base_price"
+    app_global_get_ex
+    assert // check self.base_price exists
+    intc_0 // 0
+    bytec 8 // "skew_sensitivity"
+    app_global_get_ex
+    assert // check self.skew_sensitivity exists
+    uncover 2
+    swap
+    /
+    intc_2 // 10000
+    *
+    +
+    retsub
+
+contract.VoiSuperBowlWhaleMarket.get_price_after_if_else@6:
+    // contract.py:41
+    // return self.base_price
+    intc_0 // 0
+    bytec_3 // "base_price"
+    app_global_get_ex
+    assert // check self.base_price exists
+    retsub
